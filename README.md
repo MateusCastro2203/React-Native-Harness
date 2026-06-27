@@ -62,6 +62,22 @@ npm run test            # Jest + jest-expo + React Native Testing Library
 > No **estado inicial da base os três sensores passam.** É de propósito: o palco começa
 > verde. O `DEMO-1` é quem fica vermelho — veja §3.
 
+### Smoke check de bundle (rode antes do demo)
+
+```bash
+npm run bundle:check    # expo export --platform android (resolve o grafo do Metro)
+```
+
+`typecheck/lint/test` **não** empacotam o app — eles não pegam erros de **resolução de
+módulo do Metro** (ex.: uma dependência de runtime do `expo-router` faltando, como
+`expo-linking`). O `bundle:check` faz um export real e falha cedo se algum módulo não
+resolver. Rode-o uma vez antes de apresentar.
+
+> **Troubleshooting — `Unable to resolve "<módulo>"` ao abrir no device:** é uma dep de
+> runtime ausente. Instale a versão compatível com o SDK com `npx expo install <módulo>`
+> e rode `npm run bundle:check` de novo. (Lição de harness: para um app RN, *bundling* é
+> um sensor que vale a pena ter ao lado de `typecheck/lint/test`.)
+
 Stack: Expo SDK 52 · React Native 0.76 · React 18.3 · `expo-router` 4 · TypeScript
 estrito · Zustand · styled-components/native · Jest + RNTL.
 
