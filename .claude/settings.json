@@ -1,0 +1,28 @@
+{
+  "$comment": "Allowlist minima para o harness do /resolve. Sensores (typecheck/lint/test), git para branch/commit e gh para PR. Merge negado de proposito: nenhum merge automatico, revisao humana obrigatoria (ver passo 9 de .claude/commands/resolve.md).",
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck)",
+      "Bash(npm run lint)",
+      "Bash(npm run test)",
+      "Bash(npm install)",
+      "Bash(npm ci)",
+      "Bash(git status)",
+      "Bash(git checkout*)",
+      "Bash(git switch*)",
+      "Bash(git branch*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(gh pr create*)",
+      "Bash(gh pr view*)"
+    ],
+    "deny": [
+      "Bash(git merge*)",
+      "Bash(gh pr merge*)",
+      "Bash(git push --force*)",
+      "Bash(git rebase*)"
+    ]
+  }
+}
