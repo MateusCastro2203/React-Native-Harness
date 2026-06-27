@@ -75,7 +75,8 @@ escopo de outros tickets).
 
 ## Contrato de teste (aceite)
 
-Adicionar **exatamente** o teste abaixo em `tests/cart.coupon.test.ts`. Ele importa o cart
+Adicionar **exatamente** o teste abaixo em `tests/cart.coupon.test.ts` (novo arquivo — a
+base não contém teste de cupom, por isso o estado inicial fica verde). Ele importa o cart
 store, adiciona itens, aplica o cupom válido `SAVE10` (10%) e **assere o `total` com desconto**
 (não o `subtotal`). O teste é determinístico: usa preços fixos e reseta o store antes de cada
 caso.

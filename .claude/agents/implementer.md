@@ -82,6 +82,11 @@ Aplique as edicoes (via `Edit`/`Write`) e retorne um markdown curto:
 > 1. Primeiro sprint: adicione o **teste de aceite** do spec (valida o `total` com
 >    desconto). Isso deixa o teste **vermelho** contra o codigo bugado — esperado.
 > 2. O evaluator reprova e te devolve o motivo (assercao do total falhou).
-> 3. Volta de correcao: ajuste `applyCoupon` para aplicar o desconto ao **total**.
+> 3. Volta de correcao: ajuste o **selector `total()`** (em `src/store/cart.store.ts`,
+>    onde os selectors `subtotal()`/`total()` sao definidos — nao em `useCart.ts`, que
+>    apenas reexpoe) para aplicar o desconto do
+>    cupom (`total = subtotal - round(subtotal * coupon.discountPercent / 100)`,
+>    piso em 0). O `applyCoupon` ja guarda o `Coupon` corretamente — a logica do
+>    desconto vive no `total()`, nao no `applyCoupon`. O `subtotal()` permanece cru.
 > 4. O evaluator roda de novo → **verde**.
-> Faca a correcao minima no total; nao reescreva a store inteira.
+> Faca a correcao minima no `total()`; nao reescreva a store inteira.

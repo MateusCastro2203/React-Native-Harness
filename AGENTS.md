@@ -96,7 +96,8 @@ A consequência de projeto, fiel à palestra:
 
 ## Anatomia: os 4 agentes
 
-> Mapeia o **Slide 03 — Anatomia** (Planner › Generator › Evaluator + Reviewer).
+> Mapeia o **Slide 03 — Anatomia** (Planner › Generator › Evaluator + Reviewer). O
+> *Generator* da palestra é o nosso **`implementer`**.
 
 Cada especialista tem **ferramentas restritas** declaradas no front-matter YAML
 `tools:`. A restrição é deliberada — é parte do controle: o implementer não roda

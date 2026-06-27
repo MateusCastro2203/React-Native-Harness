@@ -20,7 +20,7 @@ O repo serve a dois propósitos:
 |------|----------|-------------------|
 | 01 Conceito | Agent = Model + Harness | `CLAUDE.md` + `AGENTS.md` |
 | 02 Arquitetura | Contexto · Ferramentas · Controle · Observabilidade | `CLAUDE.md`, `.claude/settings.json`, `.claude/logs/` |
-| 03 Anatomia | Planner › Generator › Evaluator (+ Reviewer) | `.claude/agents/*.md` |
+| 03 Anatomia | Planner › Generator (=`implementer`) › Evaluator (+ Reviewer) | `.claude/agents/*.md` |
 | 04 Ciclo | Feedforward (regras) + Feedback (sensores) | `CLAUDE.md`/`specs/` + `npm run typecheck\|lint\|test` + reviewer |
 | 05 Novo papel | Engenharia de direção, ajuste incremental | `README.md` (roteiro de demo) |
 | 06 Conclusão | Shift Quality Left | pipeline do `/resolve` |
@@ -73,7 +73,7 @@ No Claude Code **um subagent não pode disparar outro subagent** (sem aninhament
 - **Feedback (depois da ação):**
   - *Computacional (rápido):* `typecheck`, `lint`, `test` rodados de verdade. Em `fail`, o erro volta ao `implementer` (loop com limite de 3 voltas).
   - *Inferencial (IA como juiz):* `reviewer` dá parecer de elegância/aderência a convenções — qualidade que os sensores rápidos não capturam.
-- **Observabilidade:** cada volta grava um log de decisão em `.claude/logs/<KEY>-<timestamp>.md` (pass/fail, motivo, diff de raciocínio). Auditável.
+- **Observabilidade:** cada volta grava um log de decisão em `.claude/logs/<KEY>-<ROUND>.md` (pass/fail, motivo, diff de raciocínio). Auditável.
 - **Controle:** permissões mínimas por agente (`tools:` no front-matter de cada subagent), allowlist em `.claude/settings.json`, **nenhum merge automático**, orquestrador **nunca pula os sensores**.
 
 ---

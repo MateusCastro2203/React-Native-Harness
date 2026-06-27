@@ -61,6 +61,9 @@ Despache o subagent **implementer** passando: `KEY`, `PLAN`. Ele implementa a pr
 unidade do plano (sprints pequenos) e devolve `CHANGED_FILES` + resumo. **Ele nao roda
 sensores.**
 
+Neste **primeiro** dispatch nao se passa `ROUND` nem `FEEDBACK` (eles so existem nas
+voltas de correcao do passo 5). Em seguida, prossiga para o passo 5 com `ROUND = 1`.
+
 ### 5. Loop de sensores: evaluator <-> implementer (MAX 3 voltas)
 
 Inicie `ROUND = 1`. Repita:
@@ -68,8 +71,9 @@ Inicie `ROUND = 1`. Repita:
 1. Despache o subagent **evaluator** passando: `KEY`, `ROUND`, `DOD` (o contrato de
    pronto). Ele roda `npm run typecheck`, `npm run lint`, `npm run test`, captura a
    saida real e emite veredito.
-2. **Grave o log de decisao** em `.claude/logs/<KEY>-<ROUND>.md` com o formato abaixo
-   (se o evaluator nao tiver gravado, grave voce a partir do que ele retornou).
+2. **Grave voce (orquestrador) o log de decisao** em `.claude/logs/<KEY>-<ROUND>.md`
+   (via `Write`), a partir do conteudo que o evaluator retornou — o evaluator nao
+   escreve o log (so tem `Read`/`Bash` para os sensores). Use o formato abaixo.
 3. Avalie o veredito:
    - **PASS** -> saia do loop e va ao passo 6.
    - **FAIL** e `ROUND < 3` -> incremente `ROUND`, redespache o **implementer**
@@ -117,9 +121,12 @@ Somente apos `PASS`. Despache o subagent **reviewer** passando: `KEY`, `PLAN`,
 `CHANGED_FILES`, `SENSOR_VERDICT = PASS`. Receba o **parecer** (APROVADO / APROVADO COM
 RESSALVAS / AJUSTES NECESSARIOS). Guarde em `REVIEW`.
 
-- Se o parecer for **AJUSTES NECESSARIOS**, voce pode (a criterio) redespachar o
-  implementer com os ajustes e repetir o passo 5 — respeitando o mesmo limite de 3
-  voltas. Caso contrario, registre as ressalvas no corpo do PR.
+- Se o parecer for **AJUSTES NECESSARIOS**, voce pode redespachar o implementer com os
+  ajustes e repetir o passo 5 **usando o MESMO contador `ROUND`** (nao reinicia um novo
+  ciclo de 3): so prossiga enquanto `ROUND < 3`; se as 3 voltas ja foram consumidas,
+  **pare** e relate ao usuario (limite atingido), sem forcar o PR. Para parecer
+  **APROVADO COM RESSALVAS**, nao reabra o loop — apenas registre as ressalvas no corpo
+  do PR.
 
 ### 7. Commits (Conventional Commits + trailer de IA)
 
@@ -141,7 +148,8 @@ AI-Tool: claude-code
 
 ### 8. PR — gated por `--pr` (dry-run e o padrao)
 
-Monte o **corpo do PR** com o template abaixo. Depois:
+Monte o **corpo do PR** com o template abaixo, extraindo a **Evidencia dos sensores** dos
+logs reais gravados no passo 5 (`.claude/logs/<KEY>-*.md`) — nunca de parafrase. Depois:
 
 - **Sem `--pr` (dry-run, padrao):** **imprima** para o usuario o comando `gh pr create`
   completo + o corpo do PR (em bloco de codigo). NAO execute push nem `gh`.

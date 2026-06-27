@@ -40,9 +40,10 @@ Regras de execucao:
 
 ## O que voce produz (saida)
 
-1. **Grava o log de decisao** em `.claude/logs/<KEY>-<ROUND>.md` (via `Write`? Nao —
-   voce so tem `Read`/`Bash`; use `Bash` para escrever o arquivo com `tee`/redirect, ou
-   informe o conteudo exato e o orquestrador grava). Formato obrigatorio do log:
+1. **Monta o conteudo do log de decisao** no formato abaixo e o **retorna ao
+   orquestrador**, que grava o arquivo em `.claude/logs/<KEY>-<ROUND>.md`. Voce tem
+   apenas `Read`/`Bash`, e seu `Bash` so pode rodar os 3 sensores — **nao escreva o log
+   voce mesmo**. Formato obrigatorio do log:
 
 ```markdown
 # Log de decisao — <KEY>
@@ -84,8 +85,10 @@ Regras de execucao:
 - NAO edita, cria nem corrige codigo da aplicacao (sem `Edit`/`Write` de fonte).
 - NAO decide elegancia/design — isso e do reviewer.
 - NAO inventa resultado: o veredito reflete a saida real dos comandos.
-- Os unicos comandos `Bash` que voce executa sao os tres sensores (e, se necessario,
-  a escrita do proprio log). Nada de `git`, `gh` ou instalacao.
+- Os unicos comandos `Bash` que voce executa sao os tres sensores
+  (`npm run typecheck|lint|test`) — exatamente o que a allowlist de
+  `.claude/settings.json` permite. Voce **nao escreve o log** (quem grava e o
+  orquestrador), nem roda `git`, `gh` ou instalacao.
 
 > **DEMO-1:** no round 1, o teste de aceite do total falhara contra o `applyCoupon`
 > incompleto. Reporte `FAIL` com a assercao exata do Jest (esperado x recebido no
