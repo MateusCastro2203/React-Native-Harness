@@ -1,6 +1,6 @@
 ---
-description: Orquestrador do workflow ticket -> PR. Le o ticket de specs/tickets/<KEY>.md, cria a branch, despacha planner/implementer/evaluator/reviewer via Task, roda os sensores em loop (max 3 voltas), commita com trailer de IA e prepara o PR (gated por --pr). Para no PR — sem merge automatico.
-argument-hint: "<KEY> [--pr]"
+description: Orquestrador do workflow ticket -> mudancas revisaveis. Le o ticket de specs/tickets/<KEY>.md, cria a branch, despacha planner/implementer/evaluator/reviewer via Task, roda os sensores em loop (max 3 voltas) e DEIXA as mudancas na arvore de trabalho (SEM commitar), apresentando os commits sugeridos + corpo do PR para revisao humana. NUNCA commita nem cria PR automaticamente.
+argument-hint: "<KEY>"
 ---
 
 # /resolve — Orquestrador (thread principal)
@@ -9,10 +9,14 @@ Voce e o **ORQUESTRADOR**. Voce roda na **thread principal** (nao e um subagent)
 despacha os 4 especialistas via a ferramenta **Task**. Restricao de plataforma: um
 subagent NAO pode disparar outro subagent — por isso a orquestracao vive aqui.
 
-**Argumentos:** `$ARGUMENTS` = `<KEY> [--pr]`.
+**Argumentos:** `$ARGUMENTS` = `<KEY>`.
 - `KEY` (obrigatorio): chave do ticket, ex.: `DEMO-1`.
-- `--pr` (opcional): cria o PR de verdade. **Sem `--pr` o padrao e dry-run**: roda
-  tudo, commita na branch e **imprime** o comando `gh` + o corpo do PR, sem push.
+
+> **Regra dura: este workflow NUNCA commita e NUNCA cria PR automaticamente.** Ele
+> implementa, roda os sensores ate o verde e **deixa as mudancas na arvore de trabalho**
+> (sem `git add`/`git commit`). No fim, apresenta ao humano os **commits sugeridos**
+> (mensagens Conventional + trailer de IA) e o **corpo do PR** para que a pessoa revise e
+> execute manualmente. Revisao humana antes de qualquer commit.
 
 Os 4 especialistas e suas ferramentas (escopo restrito, declarado no front-matter de
 cada um em `.claude/agents/`):
@@ -21,8 +25,9 @@ cada um em `.claude/agents/`):
 - **evaluator** — `Read, Bash`. So roda `npm run typecheck|lint|test`; decide PASS/FAIL.
 - **reviewer** — `Read, Grep, Glob`. Parecer inferencial de elegancia/convencoes.
 
-Principios inegociaveis: **nunca pule os sensores**; **nenhum merge automatico**; tudo
-auditavel em `.claude/logs/`; permissoes minimas por agente.
+Principios inegociaveis: **nunca pule os sensores**; **nunca commite nem crie PR
+automaticamente** (deixe as mudancas na arvore para revisao humana); **nenhum merge
+automatico**; tudo auditavel em `.claude/logs/`; permissoes minimas por agente.
 
 ---
 
@@ -122,13 +127,23 @@ RESSALVAS / AJUSTES NECESSARIOS). Guarde em `REVIEW`.
   **APROVADO COM RESSALVAS**, nao reabra o loop — apenas registre as ressalvas no corpo
   do PR.
 
-### 7. Commits (Conventional Commits + trailer de IA)
+### 7. NAO commitar — deixar na arvore e sugerir os commits
 
-- `git add` dos arquivos alterados.
-- Commit com **Conventional Commits** em ingles, referenciando a `KEY`. Exemplos:
-  `feat(cart): apply coupon discount to total (DEMO-1)`,
-  `test(cart): add acceptance test for discounted total (DEMO-1)`.
-- **TODO commit deve incluir o trailer de IA exigido pela organizacao** (Creditas):
+**Nao execute `git add` nem `git commit`.** As mudancas ficam na arvore de trabalho para
+revisao humana. Em vez de commitar, **apresente** ao usuario os **commits sugeridos**
+(em bloco de codigo, para ele copiar/executar apos revisar), seguindo **Conventional
+Commits** em ingles, referenciando a `KEY`, e **com o trailer de IA** exigido pela
+organizacao (Creditas). Exemplos de mensagens sugeridas:
+
+```
+test(cart): add acceptance test for discounted total (DEMO-1)
+
+<corpo opcional>
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+AI-Assisted: yes
+AI-Tool: claude-code
+```
 
 ```
 feat(cart): apply coupon discount to total (DEMO-1)
@@ -140,16 +155,17 @@ AI-Assisted: yes
 AI-Tool: claude-code
 ```
 
-### 8. PR — gated por `--pr` (dry-run e o padrao)
+Liste tambem os arquivos que cada commit sugerido agruparia (`CHANGED_FILES` + logs de
+`.claude/logs/`), para a pessoa validar o escopo antes de commitar.
+
+### 8. Sugerir o corpo do PR (nao executar)
 
 Monte o **corpo do PR** com o template abaixo, extraindo a **Evidencia dos sensores** dos
-logs reais gravados no passo 5 (`.claude/logs/<KEY>-*.md`) — nunca de parafrase. Depois:
-
-- **Sem `--pr` (dry-run, padrao):** **imprima** para o usuario o comando `gh pr create`
-  completo + o corpo do PR (em bloco de codigo). NAO execute push nem `gh`.
-- **Com `--pr`:** execute `gh pr create --title "<KEY>: <titulo>" --body "<corpo>"
-  --label "creditas:ai:assisted"`. Use a label `creditas:ai:autonomous` apenas se o
-  fluxo tiver sido 100% IA sem intervencao humana; caso contrario `creditas:ai:assisted`.
+logs reais gravados no passo 5 (`.claude/logs/<KEY>-*.md`) — nunca de parafrase. Depois
+**imprima** para o usuario, em bloco de codigo, o corpo do PR e um comando `gh pr create`
+sugerido (com label `creditas:ai:assisted`; use `creditas:ai:autonomous` apenas se o
+fluxo tiver sido 100% IA sem intervencao humana). **NAO execute** `git add`, `git commit`,
+`git push` nem `gh` — tudo isso e acao humana, apos revisar a arvore de trabalho.
 
 **Template do corpo do PR:**
 
@@ -177,12 +193,14 @@ fonte: `specs/tickets/<KEY>.md`
 Generated with Claude Code
 ```
 
-### 9. PARA no PR
+### 9. PARA na arvore de trabalho (revisao humana)
 
-**Sem merge automatico.** Revisao humana e obrigatoria. Nao execute `git merge` nem
-`gh pr merge` (negados em `.claude/settings.json`). Encerre relatando: branch criada,
-veredito dos sensores, parecer do reviewer e o estado do PR (impresso em dry-run ou
-criado com `--pr`).
+**Nao commita, nao cria PR, nao faz merge.** As mudancas ficam **na arvore de trabalho**,
+sem `git add`/`git commit`, para a pessoa revisar antes de qualquer commit. Nao execute
+`git add`, `git commit`, `git push`, `git merge` nem `gh` (merge/push negados em
+`.claude/settings.json`). Encerre relatando: branch criada, veredito dos sensores, parecer
+do reviewer, a **lista de arquivos alterados na arvore** e os **commits + corpo do PR
+sugeridos** (passos 7-8) para execucao humana.
 
 ---
 
