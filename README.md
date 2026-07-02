@@ -1,8 +1,8 @@
 # React Native Harness — `Agent = Model + Harness`
 
 > Repositório-palco da palestra **"Agent = Model + Harness"** (Anthropic), aplicado a um
-> app React Native real. O agente lê um ticket do Jira, **planeja → implementa → roda
-> sensores → autocorrige → revisa → commita → abre PR** e **para antes do merge**.
+> app React Native real. O agente lê um ticket de `specs/tickets/`, **planeja → implementa
+> → roda sensores → autocorrige → revisa → commita → abre PR** e **para antes do merge**.
 > Revisão humana é obrigatória.
 
 A prosa é em **português**; o código, os tipos e as mensagens de commit (Conventional
@@ -90,10 +90,9 @@ O clímax é um comando: **`/resolve DEMO-1`**. Ele encena o ciclo inteiro de fo
 
 ### 0:00 — Preparar o palco (antes de gravar/apresentar)
 
-- **MCP do Jira (opcional):** com o Atlassian MCP conectado, o `/resolve` lê o ticket
-  ao vivo (`getJiraIssue`). **Sem conexão, cai automaticamente para
-  `specs/tickets/DEMO-1.md`** — e loga qual fonte usou. *Demo-seguro: roda em qualquer
-  máquina.*
+- **Ticket local:** o `/resolve` lê o ticket de `specs/tickets/DEMO-1.md` — fonte única,
+  versionada no repo. *Demo-seguro: determinístico e roda em qualquer máquina, sem
+  dependência de rede ou sessão externa.*
 - **`gh` (opcional):** só é preciso se você for usar `--pr`. **O padrão é dry-run** (não
   toca no GitHub). Para o palco, deixe **sem `--pr`**.
 - Mostre rápido que a base está verde: `npm run test` passando.
@@ -106,9 +105,8 @@ O clímax é um comando: **`/resolve DEMO-1`**. Ele encena o ciclo inteiro de fo
 
 Narre cada fase enquanto ela aparece:
 
-1. **Leitura do ticket (fonte híbrida).** Aponte a linha que diz se a fonte foi `jira`
-   ou `local`. *"O harness tenta o Jira; se não houver, usa o spec local — e registra a
-   decisão."*
+1. **Leitura do ticket.** Aponte a linha que mostra a fonte: `specs/tickets/DEMO-1.md`.
+   *"O harness lê o ticket versionado no repo — determinístico, sem dependência externa."*
 2. **Branch.** `feature/DEMO-1-<slug>`. *"Trabalho isolado, nada na main."*
 3. **`planner` → contrato de pronto.** Mostre o `PLAN`: arquivos afetados, impacto em
    tipos/rotas e os **critérios de aceite verificáveis**. *"O agente que planeja só
@@ -180,7 +178,7 @@ A leitura dos dois lado a lado é a prova visual do **erro → autocorreção �
 │  └─ types/                    # Product, Category, CartItem, Coupon
 ├─ specs/
 │  ├─ project.md                # spec do projeto
-│  └─ tickets/                  # DEMO-1..DEMO-7 (espelham o Jira)
+│  └─ tickets/                  # DEMO-1..DEMO-7 (tickets da demo)
 ├─ tests/                       # Jest + RNTL (lógica de carrinho/totais)
 ├─ .claude/
 │  ├─ agents/                   # os 4 especialistas (ferramentas restritas)

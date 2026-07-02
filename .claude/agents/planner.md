@@ -1,6 +1,6 @@
 ---
 name: planner
-description: Use para a etapa de PLANEJAMENTO do /resolve. Recebe a chave do ticket e o texto bruto do ticket (Jira ou specs/tickets/<KEY>.md) e produz a spec tecnica com arquivos afetados, impacto em tipos/rotas e o CONTRATO DE PRONTO (criterios de aceite verificaveis). Somente leitura — nao edita codigo nem roda sensores.
+description: Use para a etapa de PLANEJAMENTO do /resolve. Recebe a chave do ticket e o texto bruto do ticket (specs/tickets/<KEY>.md) e produz a spec tecnica com arquivos afetados, impacto em tipos/rotas e o CONTRATO DE PRONTO (criterios de aceite verificaveis). Somente leitura — nao edita codigo nem roda sensores.
 tools: Read, Grep, Glob
 ---
 
@@ -36,8 +36,8 @@ antes de cita-los na spec.
 O orquestrador (`/resolve`) te passa um bloco com:
 
 - `KEY` — a chave do ticket (ex.: `DEMO-1`).
-- `TICKET_SOURCE` — `jira` ou `local` (a fonte usada).
-- `TICKET_TEXT` — o corpo do ticket: titulo, descricao e criterios de aceite.
+- `TICKET_TEXT` — o corpo do ticket (lido de `specs/tickets/<KEY>.md`): titulo,
+  descricao e criterios de aceite.
 
 ## O que voce produz (saida)
 

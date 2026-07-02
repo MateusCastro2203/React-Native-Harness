@@ -1,6 +1,6 @@
 ---
-description: Orquestrador do workflow ticket -> PR. Le o ticket (Jira via MCP ou specs/tickets local), cria a branch, despacha planner/implementer/evaluator/reviewer via Task, roda os sensores em loop (max 3 voltas), commita com trailer de IA e prepara o PR (gated por --pr). Para no PR — sem merge automatico.
-argument-hint: "<JIRA-KEY> [--pr]"
+description: Orquestrador do workflow ticket -> PR. Le o ticket de specs/tickets/<KEY>.md, cria a branch, despacha planner/implementer/evaluator/reviewer via Task, roda os sensores em loop (max 3 voltas), commita com trailer de IA e prepara o PR (gated por --pr). Para no PR — sem merge automatico.
+argument-hint: "<KEY> [--pr]"
 ---
 
 # /resolve — Orquestrador (thread principal)
@@ -28,17 +28,14 @@ auditavel em `.claude/logs/`; permissoes minimas por agente.
 
 ## Os 9 passos (execute em ordem)
 
-### 1. Ler o ticket (fonte hibrida MCP -> local)
+### 1. Ler o ticket (local — `specs/tickets/<KEY>.md`)
 
-1. Tente o **Atlassian MCP do Jira**: `getJiraIssue` com a `KEY` (resumo, descricao,
-   criterios de aceite). Se a chamada funcionar, `TICKET_SOURCE = jira`.
-2. **Fallback**: se o MCP estiver indisponivel (sem sessao/rede) ou a issue nao for
-   encontrada, leia `specs/tickets/<KEY>.md` com `Read`. `TICKET_SOURCE = local`.
-3. **Logue a fonte usada** (jira ou local) no inicio — isso entra na evidencia.
-4. Monte `TICKET_TEXT` (titulo + descricao + criterios de aceite) para passar ao planner.
-
-Se nem o MCP nem o arquivo local existirem, pare e informe o usuario (nao invente o
-ticket).
+1. Leia `specs/tickets/<KEY>.md` com `Read`. Esta e a **unica fonte de tickets** do
+   harness: os tickets da demo vivem versionados no repo (`DEMO-1`..`DEMO-7`), o que
+   torna a execucao deterministica e sem dependencia de rede/sessao externa.
+2. Se o arquivo **nao existir**, **pare e informe o usuario** — nao invente o ticket.
+   (Liste `specs/tickets/` para sugerir as chaves disponiveis.)
+3. Monte `TICKET_TEXT` (titulo + descricao + criterios de aceite) para passar ao planner.
 
 ### 2. Criar a branch
 
@@ -48,12 +45,9 @@ ticket).
 
 ### 3. Dispatch do planner (Task)
 
-Despache o subagent **planner** passando: `KEY`, `TICKET_SOURCE`, `TICKET_TEXT`.
+Despache o subagent **planner** passando: `KEY`, `TICKET_TEXT`.
 Receba de volta o **plano tecnico** (arquivos afetados, impacto em tipos/rotas, plano
 de sprints e o **contrato de pronto**). Guarde em `PLAN`.
-
-(Opcional, so se `TICKET_SOURCE = jira` e MCP disponivel: comente um resumo do plano no
-ticket via `addCommentToJiraIssue`.)
 
 ### 4. Dispatch do implementer (Task)
 
@@ -177,7 +171,7 @@ logs reais gravados no passo 5 (`.claude/logs/<KEY>-*.md`) — nunca de parafras
 <veredito + ressalvas relevantes do REVIEW.>
 
 ## Ticket
-<link do Jira se TICKET_SOURCE=jira, senao "fonte local: specs/tickets/<KEY>.md">
+fonte: `specs/tickets/<KEY>.md`
 
 ---
 Generated with Claude Code

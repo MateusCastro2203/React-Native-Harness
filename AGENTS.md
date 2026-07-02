@@ -50,7 +50,7 @@ com a descoberta de erros empurrada para a esquerda (*shift quality left*).
 ```
                     ┌──────────────────────────────────────────────┐
    ticket <KEY> ──► │  /resolve  (ORQUESTRADOR — thread principal)   │
-                    │  lê Jira/local → branch → dispatch → DoD       │
+                    │  lê specs/tickets → branch → dispatch → DoD    │
                     └───────┬───────────────┬───────────┬───────────┘
                             │               │           │
                    Task ►   ▼     Task ►     ▼  Task ►   ▼
@@ -193,12 +193,11 @@ Uso: `/resolve <KEY> [--pr]`. Sem `--pr`, o padrão é **dry-run** (roda tudo, c
 branch e **imprime** o comando `gh` + o corpo do PR, sem criar nada). Com `--pr`, cria o
 PR de verdade.
 
-1. **Lê o ticket (fonte híbrida).** Tenta o Atlassian MCP do Jira (`getJiraIssue`); se
-   indisponível, faz *fallback* para `specs/tickets/<KEY>.md`. **Loga a fonte usada**
-   (`jira` ou `local`). Se nenhuma existir, para — não inventa o ticket.
+1. **Lê o ticket** de `specs/tickets/<KEY>.md` (fonte única, versionada no repo — a
+   execução é determinística e sem dependência de rede/sessão externa). Se o arquivo não
+   existir, para — não inventa o ticket.
 2. **Cria a branch** `feature/<KEY>-<slug>` (slug kebab-case a partir do título).
-3. **Dispatch do planner** → produz `PLAN` (spec + Contrato de Pronto). Opcional: comenta
-   o resumo no ticket via MCP.
+3. **Dispatch do planner** → produz `PLAN` (spec + Contrato de Pronto).
 4. **Dispatch do implementer** → implementa a próxima unidade do plano (sprints) e
    devolve `CHANGED_FILES`. Não roda sensores.
 5. **Loop evaluator ↔ implementer (MÁX 3 voltas).** Evaluator roda os 3 sensores e emite

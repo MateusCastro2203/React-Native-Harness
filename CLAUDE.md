@@ -9,7 +9,7 @@
 Este repositório é o material da palestra **"Agent = Model + Harness"** (Anthropic) aplicado a **React Native**. Ele demonstra, de ponta a ponta, um workflow de desenvolvimento conduzido por agentes sobre um app real:
 
 ```
-ticket Jira → plano → implementação → sensores → reviewer → commit → PR (para antes do merge)
+ticket (specs/tickets) → plano → implementação → sensores → reviewer → commit → PR (para antes do merge)
 ```
 
 O conceito central da palestra:
@@ -32,7 +32,7 @@ O repo serve a dois propósitos: (1) **material de palestra** — cada peça map
 ```
                     ┌──────────────────────────────────────────────┐
    ticket <KEY> ──► │  /resolve  (ORQUESTRADOR — thread principal)   │
-                    │  lê Jira/local → branch → dispatch → DoD       │
+                    │  lê specs/tickets → branch → dispatch → DoD    │
                     └───────┬───────────────┬───────────┬───────────┘
                             │               │           │
                    Task ►   ▼     Task ►     ▼  Task ►   ▼
@@ -74,7 +74,7 @@ Expo SDK 52 · React Native 0.76 · React 18.3 · `expo-router` 4 · TypeScript 
 │  └─ types/                           # Product, Category, CartItem, Coupon...
 ├─ specs/
 │  ├─ project.md                       # spec do projeto
-│  └─ tickets/                         # DEMO-1..DEMO-7 (espelham o Jira)
+│  └─ tickets/                         # DEMO-1..DEMO-7 (tickets da demo)
 ├─ tests/                              # Jest + RNTL (lógica de carrinho/totais)
 ├─ .claude/
 │  ├─ agents/                          # planner, implementer, evaluator, reviewer
@@ -151,7 +151,7 @@ Uma tarefa só está **pronta** quando **TODOS** os itens abaixo são verdadeiro
 
 O orquestrador vive em `.claude/commands/resolve.md` (thread principal) e despacha os 4 especialistas via `Task`. São **9 passos**:
 
-1. **Lê o ticket.** Tenta o Atlassian MCP do Jira (`getJiraIssue`); fallback para `specs/tickets/<KEY>.md`. **Loga a fonte usada.**
+1. **Lê o ticket** de `specs/tickets/<KEY>.md` (fonte única, versionada no repo). Se o arquivo não existir, para — não inventa o ticket.
 2. **Cria branch** `feature/<KEY>-slug`.
 3. **Dispatch `planner`** → PLAN + contrato de pronto.
 4. **Dispatch `implementer`** → implementa em sprints pequenos.
